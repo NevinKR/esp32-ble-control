@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ESP32 Buzzer Controller</title>
+</head>
+<body>
+  <h2>ESP32 Buzzer Control</h2>
+  <button onclick="connect()">🔗 Connect</button>
+  <button onclick="turnOn()">🔊 ON</button>
+  <button onclick="turnOff()">🔇 OFF</button>
+
+  <script>
+    let bleDevice;
+    let bleServer;
+    let buzzerCharacteristic;
+
+    const SERVICE_UUID = '12345678-1234-1234-1234-1234567890ab';
+    const CHARACTERISTIC_UUID = 'abcd1234-5678-90ab-cdef-1234567890ab';
+
+    async function connect() {
+      try {
+        bleDevice = await navigator.bluetooth.requestDevice({
+          filters: [{ services: [SERVICE_UUID] }]
+        });
+
+        bleServer = await bleDevice.gatt.connect();
+        const service = await bleServer.getPrimaryService(SERVICE_UUID);
+        buzzerCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+
+        alert("✅ Connected to ESP32");
+      } catch (error) {
+        console.error(error);
+        alert("❌ Connection failed");
+      }
+    }
+
+    async function turnOn() {
+      if (buzzerCharacteristic) {
+        await buzzerCharacteristic.writeValue(new TextEncoder().encode("1"));
+      }
+    }
+
+    async function turnOff() {
+      if (buzzerCharacteristic) {
+        await buzzerCharacteristic.writeValue(new TextEncoder().encode("0"));
+      }
+    }
+  </script>
+</body>
+</html>
